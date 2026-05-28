@@ -1,51 +1,108 @@
 const API = 'http://localhost:3000/tarefas'
 
-// Busca e renderiza todas as tarefas
 async function carregarTarefas() {
-  const resposta = await fetch(API)
-  const tarefas = await resposta.json()
+  try {
+    const resposta = await fetch(API)
 
-  const lista = document.getElementById('lista-tarefas')
-  lista.innerHTML = ''
+    if (!resposta.ok) {
+      throw new Error(`Erro ao buscar tarefas: ${resposta.status}`)
+    }
 
-  tarefas.forEach(tarefa => {
-    const li = document.createElement('li')
-    li.innerHTML = `
-      <span>${tarefa.titulo}</span>
-      <button class="btn-deletar" onclick="deletarTarefa(${tarefa.id})">Deletar</button>
-    `
-    lista.appendChild(li)
-  })
+    const tarefas = await resposta.json()
+    const lista = document.getElementById('lista-tarefas')
+    lista.innerHTML = ''
+
+    tarefas.forEach(tarefa => {
+      const li = document.createElement('li')
+
+      // Se concluída, risca o texto
+      li.style.opacity = tarefa.concluida ? '0.5' : '1'
+
+      li.innerHTML = `
+        <span style="text-decoration: ${tarefa.concluida ? 'line-through' : 'none'}">
+          ${tarefa.titulo}
+        </span>
+        <div style="display:flex; gap:8px">
+          <button class="btn-concluir" onclick="concluirTarefa(${tarefa.id})" 
+            ${tarefa.concluida ? 'disabled' : ''}>
+            ✅
+          </button>
+          <button class="btn-deletar" onclick="deletarTarefa(${tarefa.id})">
+            Deletar
+          </button>
+        </div>
+      `
+      lista.appendChild(li)
+    })
+
+  } catch (erro) {
+    console.error('Erro ao carregar tarefas:', erro.message)
+    alert('Não foi possível carregar as tarefas. Servidor está rodando?')
+  }
 }
 
-// Cria nova tarefa
 async function criarTarefa() {
-  const input = document.getElementById('input-tarefa')
-  const titulo = input.value.trim()
+  try {
+    const input = document.getElementById('input-tarefa')
+    const titulo = input.value.trim()
 
-  if (!titulo) return
+    if (!titulo) return
 
-  await fetch(API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ titulo })
-  })
+    const resposta = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo })
+    })
 
-  input.value = ''
-  carregarTarefas()
+    if (!resposta.ok) {
+      throw new Error(`Erro ao criar tarefa: ${resposta.status}`)
+    }
+
+    input.value = ''
+    carregarTarefas()
+
+  } catch (erro) {
+    console.error('Erro ao criar tarefa:', erro.message)
+    alert('Não foi possível criar a tarefa.')
+  }
 }
 
-// Deleta tarefa pelo id
+async function concluirTarefa(id) {
+  try {
+    const resposta = await fetch(`${API}/${id}`, {
+      method: 'PUT'
+    })
+
+    if (!resposta.ok) {
+      throw new Error(`Erro ao concluir tarefa: ${resposta.status}`)
+    }
+
+    carregarTarefas()
+
+  } catch (erro) {
+    console.error('Erro ao concluir tarefa:', erro.message)
+    alert('Não foi possível concluir a tarefa.')
+  }
+}
+
 async function deletarTarefa(id) {
-  await fetch(`${API}/${id}`, {
-    method: 'DELETE'
-  })
+  try {
+    const resposta = await fetch(`${API}/${id}`, {
+      method: 'DELETE'
+    })
 
-  carregarTarefas()
+    if (!resposta.ok) {
+      throw new Error(`Erro ao deletar tarefa: ${resposta.status}`)
+    }
+
+    carregarTarefas()
+
+  } catch (erro) {
+    console.error('Erro ao deletar tarefa:', erro.message)
+    alert('Não foi possível deletar a tarefa.')
+  }
 }
 
-// Evento do botão
 document.getElementById('btn-adicionar').addEventListener('click', criarTarefa)
 
-// Carrega as tarefas ao abrir a página
 carregarTarefas()
