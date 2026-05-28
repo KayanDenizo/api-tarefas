@@ -46,6 +46,38 @@ app.delete('/tarefas/:id', (req, res) => {
     res.json({mensagem: 'Tarefa deletada com sucesso'})
 })
 
+
+// PUT - Atualizar EM SQLITE
+// app.put('/tarefas/:id', (req, res) => {
+//     const id = req.params.id
+//     const tarefa = db.prepare('SELECT * FROM tarefas WHERE id = ?').get(id)
+    
+//     if(!tarefa) {
+//         return res.status(404).json({erro: "Tarefa nao encontrada"})
+//     }
+    
+//     db.prepare('UPDATE tarefas SET concluida = 1 WHERE id = ?').run(id)
+    
+//     const tarefaAtualizada = db.prepare('SELECT * FROM tarefas WHERE id = ?').get(id)
+//     res.json(tarefaAtualizada)
+// })
+
+
+// PUT - EM FIND SEM SQLITE
+app.put('/tarefas/:id', (req, res) => {
+  const id = Number(req.params.id)
+  const tarefa = tarefas.find(t => t.id === id)
+
+  if (!tarefa) {
+    return res.status(404).json({ erro: 'Tarefa não encontrada' })
+  }
+
+  tarefa.concluida = true
+  res.json(tarefa)
+})
+
+
+// SEMPRE A ULTIMA LINHA DO SERVER
 app.listen(3000, () => {
     console.log('Servidor rodando em http://localhost:3000')
 })
