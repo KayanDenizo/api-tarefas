@@ -1,14 +1,15 @@
 {
   "name": "api-tarefas",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "node --watch server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Kayan Denizo",
   "license": "ISC",
-  "description": "",
+  "description": "API REST de tarefas com Express e front-end em JavaScript puro",
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1"
